@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+TOOLCHAIN_ROOT="/Library/Developer/Toolchains"
+PLIST_BUDDY_PATH=/usr/libexec/PlistBuddy
+
+version() {
+    echo "Swift Toolchain Manager 0.1.0 by giginet <giginet.net@gmail.com>"
+    echo "https://github.com/giginet/swift-toolchain-manager"
+}
+
+usage() {
+  version
+cat << EOF >&2
+
+Manage Swift toolchains
+
+Usage:
+    $(basename $0) [command] [<args>]
+
+Commands:
+    list                  List available toolchains
+    show TOOLCHAIN_NAME   Print identifier of specific toolchain
+    version               Display current script version
+EOF
+}
+
+show() {
+  toolchain_name=`echo $1 | sed -e "s/\.xctoolchain$//"`
+  toolchain_path="$TOOLCHAIN_ROOT/${toolchain_name}.xctoolchain"
+  if [[ ! -e "$toolchain_path" ]]; then
+    echo "Could not found Swift toolchain \"$toolchain_name\""
+    exit 1
+  fi
+
+  plist_path="$toolchain_path/Info.plist"
+  identifier=`$PLIST_BUDDY_PATH -c "print CFBundleIdentifier" $plist_path`
+  echo $identifier
+}
+
+subcommand=$1
+if [[ -z "$subcommand" ]]; then
+  usage
+elif [[ $subcommand == "list" ]]; then
+  ls -lh $TOOLCHAIN_ROOT | awk '{ print $9 }' | grep -e "\.xctoolchain$"
+  exit 0
+elif [[ $subcommand == "show" ]]; then
+  if [[ -z "$2" ]]; then
+    usage
+    exit 1
+  fi
+
+  show $2
+  exit 0
+elif [[ $subcommand == "version" ]]; then
+  version
+  exit 0
+else
+  echo "Unknown command $subcommand"
+  usage
+fi
