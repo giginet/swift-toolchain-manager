@@ -28,7 +28,7 @@ show() {
   toolchain_name=`echo $1 | sed -e "s/\.xctoolchain$//"`
   toolchain_path="$TOOLCHAIN_ROOT/${toolchain_name}.xctoolchain"
   if [[ ! -e "$toolchain_path" ]]; then
-    echo "Could not found Swift toolchain \"$toolchain_name\""
+    echo "Could not found Swift toolchain \"$toolchain_name\"" >&2
     exit 1
   fi
 
@@ -38,23 +38,33 @@ show() {
 }
 
 subcommand=$1
+
 if [[ -z "$subcommand" ]]; then
   usage
-elif [[ $subcommand == "list" ]]; then
-  ls -lh $TOOLCHAIN_ROOT | awk '{ print $9 }' | grep -e "\.xctoolchain$"
-  exit 0
-elif [[ $subcommand == "show" ]]; then
-  if [[ -z "$2" ]]; then
-    usage
-    exit 1
-  fi
-
-  show $2
-  exit 0
-elif [[ $subcommand == "version" ]]; then
-  version
-  exit 0
-else
-  echo "Unknown command $subcommand"
-  usage
 fi
+
+case $subcommand in
+  "list" )
+    ls -lh $TOOLCHAIN_ROOT | awk '{ print $9 }' | grep -e "\.xctoolchain$"
+    exit 0
+    ;;
+  "show" )
+    if [[ -z "$2" ]]; then
+      usage
+      exit 1
+    fi
+
+    if [ $# -gt 1 ]; then
+      show $2
+      exit 0
+    else
+      exit 1
+    fi
+    ;;
+  "version" )
+    version
+    exit 0
+    ;;
+  * )
+    echo "Unknown command $subcommand"
+esac
