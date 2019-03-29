@@ -7,7 +7,7 @@ Switch Swift toolchain easily.
 ### zplug
 
 ```zsh
-zplug "giginet/swift-toolchain-manager", lazy:true, use:'stm', as:command
+zplug "giginet/swift-toolchain-manager", lazy:true, use:'bin/stm', as:command
 ```
 
 ## Usage
